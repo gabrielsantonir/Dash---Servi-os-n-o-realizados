@@ -130,6 +130,53 @@ st.markdown("""
     .kpi-coleta::before { background: linear-gradient(90deg, #8B5CF6, #A78BFA); }
     .kpi-coleta .kpi-value { color: #A78BFA; }
 
+    .kpi-vermelho::before { background: linear-gradient(90deg, #EF4444, #F87171); }
+    .kpi-vermelho .kpi-value { color: #F87171; }
+
+    .kpi-amarelo::before { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
+    .kpi-amarelo .kpi-value { color: #FBBF24; }
+
+    .kpi-verde::before { background: linear-gradient(90deg, #10B981, #34D399); }
+    .kpi-verde .kpi-value { color: #34D399; }
+
+    /* ─── Farol Priority Panel ──────────────────────────── */
+    .farol-badge {
+        display: inline-block;
+        padding: 0.2rem 0.7rem;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+    .farol-vermelho { background: rgba(239,68,68,0.15); color: #F87171; border: 1px solid rgba(239,68,68,0.3); }
+    .farol-amarelo  { background: rgba(245,158,11,0.15); color: #FBBF24; border: 1px solid rgba(245,158,11,0.3); }
+    .farol-verde    { background: rgba(16,185,129,0.15); color: #34D399; border: 1px solid rgba(16,185,129,0.3); }
+
+    .priority-card {
+        background: linear-gradient(145deg, #1A1A2E, #16213E);
+        border: 1px solid rgba(124, 58, 237, 0.15);
+        border-radius: 12px;
+        padding: 0.8rem 1.2rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s;
+    }
+    .priority-card:hover {
+        border-color: rgba(124, 58, 237, 0.35);
+        transform: translateX(4px);
+    }
+    .priority-card .client-name {
+        color: #E0E0E0;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    .priority-card .days-info {
+        color: #9CA3AF;
+        font-size: 0.72rem;
+    }
+
     /* ─── Section Headers ───────────────────────────────── */
     .section-header {
         font-size: 1.05rem;
@@ -318,6 +365,30 @@ def read_uploaded_file(uploaded_file):
         lambda x: "Cidade Origem" if x == "COLETA" else "Cidade Destino"
     )
 
+    # ── Parse dates & compute Farol ──────────────────────────────────────────
+    for col_date in ["Data Saída", "Data Prazo", "Data Solicitação"]:
+        if col_date in df.columns:
+            df[col_date] = pd.to_datetime(df[col_date], dayfirst=True, errors="coerce")
+
+    if "Data Prazo" in df.columns and "Data Saída" in df.columns:
+        df["Dias Atraso"] = (df["Data Saída"] - df["Data Prazo"]).dt.days
+        def _farol(row):
+            if row["Coleta/Entrega"] != "COLETA" or row["Classificação"] != "Pendente":
+                return None
+            d = row["Dias Atraso"]
+            if pd.isna(d):
+                return None
+            if d >= 2:
+                return "VERMELHO"
+            elif d == 1:
+                return "AMARELO"
+            else:
+                return "VERDE"
+        df["Farol"] = df.apply(_farol, axis=1)
+    else:
+        df["Dias Atraso"] = None
+        df["Farol"] = None
+
     return df
 
 
@@ -410,7 +481,7 @@ if df is None:
 # ══════════════════════════════════════════════════════════════════════════════════
 # TABS
 # ══════════════════════════════════════════════════════════════════════════════════
-tab1, tab2 = st.tabs(["📊 Visão Geral", "🔍 Análise de Pendentes"])
+tab1, tab2, tab3 = st.tabs(["📊 Visão Geral", "🔍 Análise de Pendentes", "🚦 Farol de Coletas"])
 
 # ╔══════════════════════════════════════════════════════════════════════════════════
 # ║ TELA 1 — VISÃO GERAL
@@ -683,3 +754,116 @@ with tab2:
     df_pend_display = df_pend_display.rename(columns={"Cidade Ref": "Cidade", "Número Serviço": "Nº Serviço"})
 
     st.dataframe(df_pend_display, use_container_width=True, height=420, hide_index=True)
+
+
+# ╔══════════════════════════════════════════════════════════════════════════════════
+# ║ TELA 3 — FAROL DE COLETAS
+# ╚══════════════════════════════════════════════════════════════════════════════════
+with tab3:
+    df_farol = df[
+        (df["Coleta/Entrega"] == "COLETA") & (df["Classificação"] == "Pendente")
+    ].copy()
+
+    if df_farol.empty:
+        st.markdown("""
+        <div style="text-align:center; padding:4rem 2rem;">
+            <span style="font-size:4rem;">🎉</span>
+            <h3 style="color:#34D399; margin-top:1rem;">Nenhuma coleta pendente!</h3>
+            <p style="color:#6B7280;">Todas as coletas foram realizadas.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        total_farol = len(df_farol)
+        n_vermelho = len(df_farol[df_farol["Farol"] == "VERMELHO"])
+        n_amarelo = len(df_farol[df_farol["Farol"] == "AMARELO"])
+        n_verde = len(df_farol[df_farol["Farol"] == "VERDE"])
+
+        # ── KPI Row ──────────────────────────────────────────────────────────
+        f1, f2, f3, f4 = st.columns(4)
+        with f1:
+            st.markdown(kpi_card("📥", "Coletas Pendentes", f"{total_farol:,}",
+                                 "total do dia", "total"), unsafe_allow_html=True)
+        with f2:
+            st.markdown(kpi_card("🔴", "Vermelho", f"{n_vermelho:,}",
+                                 "2+ dias de atraso", "vermelho"), unsafe_allow_html=True)
+        with f3:
+            st.markdown(kpi_card("🟡", "Amarelo", f"{n_amarelo:,}",
+                                 "1 dia de atraso", "amarelo"), unsafe_allow_html=True)
+        with f4:
+            st.markdown(kpi_card("🟢", "Verde", f"{n_verde:,}",
+                                 "no prazo", "verde"), unsafe_allow_html=True)
+
+        st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
+
+        # ── Painel de Prioridades (VERMELHO + AMARELO) ───────────────────────
+        df_criticos = df_farol[df_farol["Farol"].isin(["VERMELHO", "AMARELO"])].copy()
+        df_criticos = df_criticos.sort_values("Dias Atraso", ascending=False)
+
+        col_prio, col_rank = st.columns([1, 1])
+
+        with col_prio:
+            st.markdown('<div class="section-header">🚨 Prioridades do Dia</div>',
+                        unsafe_allow_html=True)
+
+            if df_criticos.empty:
+                st.markdown("""
+                <div style="text-align:center; padding:2rem;">
+                    <span style="font-size:2rem;">✅</span>
+                    <p style="color:#34D399; margin-top:0.5rem; font-weight:600;">Sem atrasos hoje!</p>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                cards_html = ""
+                for _, row in df_criticos.iterrows():
+                    farol_class = "farol-vermelho" if row["Farol"] == "VERMELHO" else "farol-amarelo"
+                    farol_emoji = "🔴" if row["Farol"] == "VERMELHO" else "🟡"
+                    dias = int(row["Dias Atraso"]) if pd.notna(row["Dias Atraso"]) else 0
+                    cliente = str(row.get("Cliente", "N/A"))
+                    prazo_str = row["Data Prazo"].strftime("%d/%m") if pd.notna(row["Data Prazo"]) else "—"
+                    cards_html += f'<div class="priority-card"><div><div class="client-name">{farol_emoji} {cliente}</div><div class="days-info">Prazo: {prazo_str} · {dias} dia(s) de atraso</div></div><span class="farol-badge {farol_class}">{row["Farol"]}</span></div>'
+                st.markdown(f'<div style="max-height:500px; overflow-y:auto;">{cards_html}</div>',
+                            unsafe_allow_html=True)
+
+        # ── Ranking do Dia ────────────────────────────────────────────────────
+        with col_rank:
+            st.markdown('<div class="section-header">📊 Ranking de Clientes Pendentes</div>',
+                        unsafe_allow_html=True)
+
+            ranking = df_farol.groupby("Cliente").agg(
+                Qtd=("Cliente", "size"),
+                Pior_Farol=("Dias Atraso", "max"),
+            ).reset_index()
+            ranking = ranking.sort_values(["Pior_Farol", "Qtd"], ascending=[False, False])
+
+            rank_html = ""
+            for i, row in ranking.iterrows():
+                dias = int(row["Pior_Farol"]) if pd.notna(row["Pior_Farol"]) else 0
+                if dias >= 2:
+                    badge = '<span class="farol-badge farol-vermelho">VERMELHO</span>'
+                elif dias == 1:
+                    badge = '<span class="farol-badge farol-amarelo">AMARELO</span>'
+                else:
+                    badge = '<span class="farol-badge farol-verde">VERDE</span>'
+                rank_html += f'<div class="priority-card"><div><div class="client-name">{row["Cliente"]}</div><div class="days-info">{int(row["Qtd"])} coleta(s) pendente(s)</div></div>{badge}</div>'
+            st.markdown(f'<div style="max-height:500px; overflow-y:auto;">{rank_html}</div>',
+                        unsafe_allow_html=True)
+
+        st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
+
+        # ── Tabela detalhada ──────────────────────────────────────────────────
+        st.markdown('<div class="section-header">📄 Detalhamento — Coletas Pendentes com Farol</div>',
+                    unsafe_allow_html=True)
+
+        farol_display_cols = ["Cliente", "Motorista", "Cidade", "Data Prazo",
+                              "Data Saída", "Dias Atraso", "Farol", "Ocorrência"]
+        farol_available = [c for c in farol_display_cols if c in df_farol.columns]
+        df_farol_display = df_farol[farol_available].copy()
+
+        # Format dates for display
+        for dc in ["Data Prazo", "Data Saída"]:
+            if dc in df_farol_display.columns:
+                df_farol_display[dc] = df_farol_display[dc].dt.strftime("%d/%m/%Y").fillna("—")
+
+        df_farol_display = df_farol_display.sort_values("Dias Atraso", ascending=False)
+
+        st.dataframe(df_farol_display, use_container_width=True, height=420, hide_index=True)
