@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import io
-
 # ══════════════════════════════════════════════════════════════════════════════════
 # CONFIGURAÇÃO DA PÁGINA
 # ══════════════════════════════════════════════════════════════════════════════════
@@ -13,14 +12,12 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-
 # ══════════════════════════════════════════════════════════════════════════════════
 # CSS CUSTOMIZADO - DARK PREMIUM THEME
 # ══════════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
     /* ─── Base ──────────────────────────────────────────── */
     html, body, [class*="css"] {
         font-family: 'Inter', sans-serif;
@@ -37,7 +34,6 @@ st.markdown("""
         background: linear-gradient(180deg, #0F0F1A 0%, #12122B 100%);
         border-right: 1px solid rgba(124, 58, 237, 0.15);
     }
-
     /* ─── Title Bar ─────────────────────────────────────── */
     .dashboard-title {
         background: linear-gradient(135deg, #1A1A2E 0%, #16213E 50%, #1A1A2E 100%);
@@ -63,7 +59,6 @@ st.markdown("""
         font-size: 0.85rem;
         font-weight: 400;
     }
-
     /* ─── KPI Cards ─────────────────────────────────────── */
     .kpi-card {
         background: linear-gradient(145deg, #1A1A2E, #16213E);
@@ -110,35 +105,25 @@ st.markdown("""
         color: #6B7280;
         margin-top: 0.2rem;
     }
-
     /* Card color variants */
     .kpi-total::before { background: linear-gradient(90deg, #7C3AED, #A78BFA); }
     .kpi-total .kpi-value { color: #A78BFA; }
-
     .kpi-realizado::before { background: linear-gradient(90deg, #10B981, #34D399); }
     .kpi-realizado .kpi-value { color: #34D399; }
-
     .kpi-pendente::before { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
     .kpi-pendente .kpi-value { color: #FBBF24; }
-
     .kpi-percent::before { background: linear-gradient(90deg, #EF4444, #F87171); }
     .kpi-percent .kpi-value { color: #F87171; }
-
     .kpi-entrega::before { background: linear-gradient(90deg, #3B82F6, #60A5FA); }
     .kpi-entrega .kpi-value { color: #60A5FA; }
-
     .kpi-coleta::before { background: linear-gradient(90deg, #8B5CF6, #A78BFA); }
     .kpi-coleta .kpi-value { color: #A78BFA; }
-
     .kpi-vermelho::before { background: linear-gradient(90deg, #EF4444, #F87171); }
     .kpi-vermelho .kpi-value { color: #F87171; }
-
     .kpi-amarelo::before { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
     .kpi-amarelo .kpi-value { color: #FBBF24; }
-
     .kpi-verde::before { background: linear-gradient(90deg, #10B981, #34D399); }
     .kpi-verde .kpi-value { color: #34D399; }
-
     /* ─── Farol Priority Panel ──────────────────────────── */
     .farol-badge {
         display: inline-block;
@@ -151,7 +136,6 @@ st.markdown("""
     .farol-vermelho { background: rgba(239,68,68,0.15); color: #F87171; border: 1px solid rgba(239,68,68,0.3); }
     .farol-amarelo  { background: rgba(245,158,11,0.15); color: #FBBF24; border: 1px solid rgba(245,158,11,0.3); }
     .farol-verde    { background: rgba(16,185,129,0.15); color: #34D399; border: 1px solid rgba(16,185,129,0.3); }
-
     .priority-card {
         background: linear-gradient(145deg, #1A1A2E, #16213E);
         border: 1px solid rgba(124, 58, 237, 0.15);
@@ -176,7 +160,6 @@ st.markdown("""
         color: #9CA3AF;
         font-size: 0.72rem;
     }
-
     /* ─── Section Headers ───────────────────────────────── */
     .section-header {
         font-size: 1.05rem;
@@ -189,7 +172,6 @@ st.markdown("""
         align-items: center;
         gap: 0.5rem;
     }
-
     /* ─── Chart Container ───────────────────────────────── */
     .chart-container {
         background: linear-gradient(145deg, #1A1A2E, #16213E);
@@ -199,7 +181,6 @@ st.markdown("""
         margin-bottom: 1rem;
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
     }
-
     /* ─── Data Table ────────────────────────────────────── */
     .dataframe-container {
         background: linear-gradient(145deg, #1A1A2E, #16213E);
@@ -211,7 +192,6 @@ st.markdown("""
     div[data-testid="stDataFrame"] > div {
         border-radius: 10px;
     }
-
     /* ─── Upload Area ───────────────────────────────────── */
     section[data-testid="stSidebar"] .stFileUploader {
         border: 2px dashed rgba(124, 58, 237, 0.35);
@@ -222,7 +202,6 @@ st.markdown("""
     section[data-testid="stSidebar"] .stFileUploader:hover {
         border-color: rgba(124, 58, 237, 0.7);
     }
-
     /* ─── Tabs ──────────────────────────────────────────── */
     .stTabs [data-baseweb="tab-list"] {
         gap: 0;
@@ -248,21 +227,17 @@ st.markdown("""
     .stTabs [data-baseweb="tab-panel"] {
         padding-top: 1rem;
     }
-
     /* ─── Scrollbar ─────────────────────────────────────── */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #0F0F1A; }
     ::-webkit-scrollbar-thumb { background: #7C3AED55; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #7C3AED; }
-
     /* ─── Hide Streamlit branding ───────────────────────── */
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }
     .stDeployButton { display: none; }
 </style>
 """, unsafe_allow_html=True)
-
-
 # ══════════════════════════════════════════════════════════════════════════════════
 # PLOTLY THEME
 # ══════════════════════════════════════════════════════════════════════════════════
@@ -272,7 +247,6 @@ PLOTLY_LAYOUT = dict(
     font=dict(family="Inter, sans-serif", color="#D1D5DB", size=12),
     margin=dict(l=20, r=40, t=60, b=20),
 )
-
 COLOR_REALIZADO = "#34D399"
 COLOR_PENDENTE = "#FBBF24"
 COLOR_PALETTE = ["#7C3AED", "#A78BFA", "#C4B5FD", "#3B82F6", "#60A5FA",
@@ -284,8 +258,6 @@ STATUS_COLORS = {
     "NÃO ENTREGUE": "#FBBF24",
     "NÃO COLETADA": "#F59E0B",
 }
-
-
 # ══════════════════════════════════════════════════════════════════════════════════
 # HELPER: Read uploaded file
 # ══════════════════════════════════════════════════════════════════════════════════
@@ -293,7 +265,6 @@ def read_uploaded_file(uploaded_file):
     """Read the uploaded .xls / .xlsx file and return a clean DataFrame."""
     file_bytes = uploaded_file.read()
     file_name = uploaded_file.name.lower()
-
     # Try read_html first (common for HTML-disguised .xls files)
     try:
         tables = pd.read_html(io.BytesIO(file_bytes))
@@ -307,7 +278,6 @@ def read_uploaded_file(uploaded_file):
             raw = pd.read_excel(io.BytesIO(file_bytes), engine="openpyxl")
         except Exception:
             raw = pd.read_excel(io.BytesIO(file_bytes), engine="xlrd")
-
     # ── Detect header row (look for "Coleta/Entrega" in any cell) ────────────
     header_row = None
     for idx in range(min(20, len(raw))):
@@ -315,46 +285,41 @@ def read_uploaded_file(uploaded_file):
         if "Coleta/Entrega" in row_vals:
             header_row = idx
             break
-
     if header_row is None:
         st.error("❌ Não foi possível encontrar o cabeçalho 'Coleta/Entrega' no arquivo.")
         return None
-
     # ── Build DataFrame with proper headers ──────────────────────────────────
     headers = raw.iloc[header_row].astype(str).str.strip().tolist()
     df = raw.iloc[header_row + 1:].copy()
     df.columns = headers
     df = df.reset_index(drop=True)
-
     # Drop rows that are still metadata (NaN in key columns or repeat headers)
     df = df[df["Coleta/Entrega"].isin(["COLETA", "ENTREGA", "DESPACHO"])].copy()
     df = df.reset_index(drop=True)
-
     # ── Clean Ocorrência ─────────────────────────────────────────────────────
     if "Ocorrência" in df.columns:
         df["Ocorrência"] = df["Ocorrência"].fillna("EM BRANCO").astype(str).str.strip()
         df.loc[df["Ocorrência"] == "", "Ocorrência"] = "EM BRANCO"
         df.loc[df["Ocorrência"] == "nan", "Ocorrência"] = "EM BRANCO"
-
         # Mercadoria redespachada ou despacho deve ser considerada como ENTREGUE
         mask_redespacho = df["Ocorrência"].str.upper().str.contains(
             "MERCADORIA REDESPACHADA|DESPACHO", na=False
         )
         df.loc[mask_redespacho, "Status Manifesto"] = "ENTREGUE"
-
+    # DESPACHO na coluna Coleta/Entrega também deve ser considerado como ENTREGUE
+    mask_despacho = df["Coleta/Entrega"].str.upper() == "DESPACHO"
+    df.loc[mask_despacho, "Status Manifesto"] = "ENTREGUE"
     # ── Derived columns ──────────────────────────────────────────────────────
     status_col = "Status Manifesto"
     df["Classificação"] = df[status_col].apply(
         lambda x: "Realizado" if x in ("COLETADA", "ENTREGUE") else "Pendente"
     )
-
     # Número do Serviço: Pedido para COLETA, Minuta para ENTREGA
     df["Número Serviço"] = df.apply(
         lambda r: r.get("Pedido Coleta", "") if r["Coleta/Entrega"] == "COLETA"
         else r.get("Minuta/Conhecimento", ""),
         axis=1,
     )
-
     # Cidade contextual
     df["Cidade Ref"] = df.apply(
         lambda r: r.get("Cidade", "") if r["Coleta/Entrega"] == "COLETA"
@@ -364,12 +329,10 @@ def read_uploaded_file(uploaded_file):
     df["Tipo Cidade"] = df["Coleta/Entrega"].apply(
         lambda x: "Cidade Origem" if x == "COLETA" else "Cidade Destino"
     )
-
     # ── Parse dates & compute Farol ──────────────────────────────────────────
     for col_date in ["Data Saída", "Data Prazo", "Data Solicitação"]:
         if col_date in df.columns:
             df[col_date] = pd.to_datetime(df[col_date], dayfirst=True, errors="coerce")
-
     if "Data Prazo" in df.columns and "Data Saída" in df.columns:
         df["Dias Atraso"] = (df["Data Saída"] - df["Data Prazo"]).dt.days
         def _farol(row):
@@ -388,10 +351,7 @@ def read_uploaded_file(uploaded_file):
     else:
         df["Dias Atraso"] = None
         df["Farol"] = None
-
     return df
-
-
 # ══════════════════════════════════════════════════════════════════════════════════
 # HELPER: KPI Card HTML
 # ══════════════════════════════════════════════════════════════════════════════════
@@ -404,8 +364,6 @@ def kpi_card(icon, label, value, sub="", variant="total"):
         <div class="kpi-sub">{sub}</div>
     </div>
     """
-
-
 # ══════════════════════════════════════════════════════════════════════════════════
 # SIDEBAR
 # ══════════════════════════════════════════════════════════════════════════════════
@@ -424,7 +382,6 @@ with st.sidebar:
         </p>
     </div>
     """, unsafe_allow_html=True)
-
     st.markdown("---")
     uploaded_file = st.file_uploader(
         "📁 Carregar arquivo de Manifesto",
@@ -432,7 +389,6 @@ with st.sidebar:
         help="Selecione o arquivo .xls ou .xlsx exportado do sistema.",
     )
     st.markdown("---")
-
     st.markdown("""
     <div style="background: rgba(124,58,237,0.08); border-radius: 10px;
                 padding: 0.8rem; border: 1px solid rgba(124,58,237,0.15);">
@@ -447,12 +403,9 @@ with st.sidebar:
         </p>
     </div>
     """, unsafe_allow_html=True)
-
-
 # ══════════════════════════════════════════════════════════════════════════════════
 # MAIN CONTENT
 # ══════════════════════════════════════════════════════════════════════════════════
-
 # Title
 st.markdown("""
 <div class="dashboard-title">
@@ -460,7 +413,6 @@ st.markdown("""
     <p>Visão consolidada de serviços logísticos realizados e pendentes</p>
 </div>
 """, unsafe_allow_html=True)
-
 if uploaded_file is None:
     st.markdown("""
     <div style="text-align:center; padding:4rem 2rem;">
@@ -472,17 +424,14 @@ if uploaded_file is None:
     </div>
     """, unsafe_allow_html=True)
     st.stop()
-
 # ── Load data ────────────────────────────────────────────────────────────────────
 df = read_uploaded_file(uploaded_file)
 if df is None:
     st.stop()
-
 # ══════════════════════════════════════════════════════════════════════════════════
 # TABS
 # ══════════════════════════════════════════════════════════════════════════════════
 tab1, tab2, tab3 = st.tabs(["📊 Visão Geral", "🔍 Análise de Pendentes", "🚦 Farol de Coletas"])
-
 # ╔══════════════════════════════════════════════════════════════════════════════════
 # ║ TELA 1 — VISÃO GERAL
 # ╚══════════════════════════════════════════════════════════════════════════════════
@@ -491,7 +440,6 @@ with tab1:
     realizados = len(df[df["Classificação"] == "Realizado"])
     pendentes = len(df[df["Classificação"] == "Pendente"])
     pct_pendentes = (pendentes / total * 100) if total > 0 else 0
-
     # ── KPI Row ──────────────────────────────────────────────────────────────
     c1, c2, c3, c4 = st.columns(4)
     with c1:
@@ -509,12 +457,9 @@ with tab1:
         st.markdown(kpi_card("🚨", "% Pendentes", f"{pct_pendentes:.1f}%",
                              "serviços não realizados", "percent"),
                     unsafe_allow_html=True)
-
     st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
-
     # ── Charts Row 1: Donut + Status Breakdown ──────────────────────────────
     col_left, col_right = st.columns([1, 1.3])
-
     with col_left:
         st.markdown('<div class="section-header">🍩 Realizados vs Pendentes</div>',
                     unsafe_allow_html=True)
@@ -538,14 +483,12 @@ with tab1:
                                   x=0.5, y=0.5, showarrow=False,
                                   font=dict(size=22, color="#A78BFA"))
         st.plotly_chart(fig_donut, use_container_width=True, config={"displayModeBar": False})
-
     with col_right:
         st.markdown('<div class="section-header">📊 Detalhamento por Status</div>',
                     unsafe_allow_html=True)
         status_counts = df["Status Manifesto"].value_counts().reset_index()
         status_counts.columns = ["Status", "Quantidade"]
         colors = [STATUS_COLORS.get(s, "#7C3AED") for s in status_counts["Status"]]
-
         fig_status = go.Figure(data=[go.Bar(
             x=status_counts["Status"],
             y=status_counts["Quantidade"],
@@ -562,15 +505,12 @@ with tab1:
                                              range=[0, status_counts["Quantidade"].max() * 1.2]),
                                   xaxis=dict(gridcolor="rgba(0,0,0,0)", zeroline=False))
         st.plotly_chart(fig_status, use_container_width=True, config={"displayModeBar": False})
-
     # ── Chart Row 2: Ocorrência ──────────────────────────────────────────────
     st.markdown('<div class="section-header">📋 Distribuição por Ocorrência (Pendentes)</div>',
                 unsafe_allow_html=True)
-
     df_pend_ocorrencia = df[df["Classificação"] == "Pendente"]
     ocorrencia_counts = df_pend_ocorrencia["Ocorrência"].value_counts().reset_index()
     ocorrencia_counts.columns = ["Ocorrência", "Quantidade"]
-
     fig_ocorrencia = go.Figure(data=[go.Bar(
         y=ocorrencia_counts["Ocorrência"],
         x=ocorrencia_counts["Quantidade"],
@@ -591,30 +531,23 @@ with tab1:
         xaxis=dict(gridcolor="rgba(124,58,237,0.06)", zeroline=False, showticklabels=False),
     )
     st.plotly_chart(fig_ocorrencia, use_container_width=True, config={"displayModeBar": False})
-
     # ── Data Table ───────────────────────────────────────────────────────────
     st.markdown('<div class="section-header">📄 Tabela de Serviços</div>',
                 unsafe_allow_html=True)
-
     display_cols = ["Coleta/Entrega", "Número Serviço", "Motorista", "Cliente",
                     "Tipo Cidade", "Cidade Ref", "Status Manifesto", "Ocorrência"]
     available_cols = [c for c in display_cols if c in df.columns]
     df_display = df[available_cols].copy()
-
     # Rename for clarity
     rename_map = {"Cidade Ref": "Cidade", "Número Serviço": "Nº Serviço"}
     df_display = df_display.rename(columns=rename_map)
-
     st.dataframe(df_display, use_container_width=True, height=420,
                  hide_index=True)
-
-
 # ╔══════════════════════════════════════════════════════════════════════════════════
 # ║ TELA 2 — ANÁLISE DE PENDENTES
 # ╚══════════════════════════════════════════════════════════════════════════════════
 with tab2:
     df_pendentes = df[df["Classificação"] == "Pendente"].copy()
-
     if df_pendentes.empty:
         st.markdown("""
         <div style="text-align:center; padding:4rem 2rem;">
@@ -624,14 +557,11 @@ with tab2:
         </div>
         """, unsafe_allow_html=True)
         st.stop()
-
     entregas_pend = df_pendentes[df_pendentes["Coleta/Entrega"] == "ENTREGA"]
     coletas_pend = df_pendentes[df_pendentes["Coleta/Entrega"] == "COLETA"]
-
     total_pend = len(df_pendentes)
     total_entregas_pend = len(entregas_pend)
     total_coletas_pend = len(coletas_pend)
-
     # ── KPI Row ──────────────────────────────────────────────────────────────
     k1, k2, k3 = st.columns(3)
     with k1:
@@ -645,19 +575,15 @@ with tab2:
         st.markdown(kpi_card("📥", "Coletas Pendentes", f"{total_coletas_pend:,}",
                              f"{total_coletas_pend/total_pend*100:.1f}% dos pendentes" if total_pend else "—",
                              "coleta"), unsafe_allow_html=True)
-
     st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
-
     # ── Charts: Entregas + Coletas Pendentes ─────────────────────────────────
     col_ent, col_col = st.columns(2)
-
     with col_ent:
         st.markdown('<div class="section-header">🚚 Entregas Pendentes por Cidade Destino</div>',
                     unsafe_allow_html=True)
         if not entregas_pend.empty:
             city_ent = entregas_pend["Cidade Final"].fillna("NÃO INFORMADO").value_counts().reset_index()
             city_ent.columns = ["Cidade Destino", "Quantidade"]
-
             fig_ent = go.Figure(data=[go.Bar(
                 y=city_ent["Cidade Destino"],
                 x=city_ent["Quantidade"],
@@ -682,14 +608,12 @@ with tab2:
             st.plotly_chart(fig_ent, use_container_width=True, config={"displayModeBar": False})
         else:
             st.info("Nenhuma entrega pendente encontrada.")
-
     with col_col:
         st.markdown('<div class="section-header">📥 Coletas Pendentes por Cidade Origem</div>',
                     unsafe_allow_html=True)
         if not coletas_pend.empty:
             city_col = coletas_pend["Cidade"].fillna("NÃO INFORMADO").value_counts().reset_index()
             city_col.columns = ["Cidade Origem", "Quantidade"]
-
             fig_col = go.Figure(data=[go.Bar(
                 y=city_col["Cidade Origem"],
                 x=city_col["Quantidade"],
@@ -714,14 +638,11 @@ with tab2:
             st.plotly_chart(fig_col, use_container_width=True, config={"displayModeBar": False})
         else:
             st.info("Nenhuma coleta pendente encontrada.")
-
     # ── Chart: Motoristas com Pendentes ──────────────────────────────────────
     st.markdown('<div class="section-header">👤 Serviços Não Realizados por Motorista</div>',
                 unsafe_allow_html=True)
-
     motorista_counts = df_pendentes["Motorista"].fillna("NÃO INFORMADO").value_counts().reset_index()
     motorista_counts.columns = ["Motorista", "Quantidade"]
-
     fig_mot = go.Figure(data=[go.Bar(
         y=motorista_counts["Motorista"],
         x=motorista_counts["Quantidade"],
@@ -742,20 +663,15 @@ with tab2:
         xaxis=dict(gridcolor="rgba(124,58,237,0.06)", zeroline=False, showticklabels=False),
     )
     st.plotly_chart(fig_mot, use_container_width=True, config={"displayModeBar": False})
-
     # ── Detail Table ─────────────────────────────────────────────────────────
     st.markdown('<div class="section-header">📄 Detalhamento dos Serviços Pendentes</div>',
                 unsafe_allow_html=True)
-
     pend_display_cols = ["Coleta/Entrega", "Número Serviço", "Motorista", "Cliente",
                          "Tipo Cidade", "Cidade Ref", "Status Manifesto", "Ocorrência"]
     pend_available = [c for c in pend_display_cols if c in df_pendentes.columns]
     df_pend_display = df_pendentes[pend_available].copy()
     df_pend_display = df_pend_display.rename(columns={"Cidade Ref": "Cidade", "Número Serviço": "Nº Serviço"})
-
     st.dataframe(df_pend_display, use_container_width=True, height=420, hide_index=True)
-
-
 # ╔══════════════════════════════════════════════════════════════════════════════════
 # ║ TELA 3 — FAROL DE COLETAS
 # ╚══════════════════════════════════════════════════════════════════════════════════
@@ -763,7 +679,6 @@ with tab3:
     df_farol = df[
         (df["Coleta/Entrega"] == "COLETA") & (df["Classificação"] == "Pendente")
     ].copy()
-
     if df_farol.empty:
         st.markdown("""
         <div style="text-align:center; padding:4rem 2rem;">
@@ -777,7 +692,6 @@ with tab3:
         n_vermelho = len(df_farol[df_farol["Farol"] == "VERMELHO"])
         n_amarelo = len(df_farol[df_farol["Farol"] == "AMARELO"])
         n_verde = len(df_farol[df_farol["Farol"] == "VERDE"])
-
         # ── KPI Row ──────────────────────────────────────────────────────────
         f1, f2, f3, f4 = st.columns(4)
         with f1:
@@ -792,19 +706,14 @@ with tab3:
         with f4:
             st.markdown(kpi_card("🟢", "Verde", f"{n_verde:,}",
                                  "no prazo", "verde"), unsafe_allow_html=True)
-
         st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
-
         # ── Painel de Prioridades (VERMELHO + AMARELO) ───────────────────────
         df_criticos = df_farol[df_farol["Farol"].isin(["VERMELHO", "AMARELO"])].copy()
         df_criticos = df_criticos.sort_values("Dias Atraso", ascending=False)
-
         col_prio, col_rank = st.columns([1, 1])
-
         with col_prio:
             st.markdown('<div class="section-header">🚨 Prioridades do Dia</div>',
                         unsafe_allow_html=True)
-
             if df_criticos.empty:
                 st.markdown("""
                 <div style="text-align:center; padding:2rem;">
@@ -823,18 +732,15 @@ with tab3:
                     cards_html += f'<div class="priority-card"><div><div class="client-name">{farol_emoji} {cliente}</div><div class="days-info">Prazo: {prazo_str} · {dias} dia(s) de atraso</div></div><span class="farol-badge {farol_class}">{row["Farol"]}</span></div>'
                 st.markdown(f'<div style="max-height:500px; overflow-y:auto;">{cards_html}</div>',
                             unsafe_allow_html=True)
-
         # ── Ranking do Dia ────────────────────────────────────────────────────
         with col_rank:
             st.markdown('<div class="section-header">📊 Ranking de Clientes Pendentes</div>',
                         unsafe_allow_html=True)
-
             ranking = df_farol.groupby("Cliente").agg(
                 Qtd=("Cliente", "size"),
                 Pior_Farol=("Dias Atraso", "max"),
             ).reset_index()
             ranking = ranking.sort_values(["Pior_Farol", "Qtd"], ascending=[False, False])
-
             rank_html = ""
             for i, row in ranking.iterrows():
                 dias = int(row["Pior_Farol"]) if pd.notna(row["Pior_Farol"]) else 0
@@ -847,23 +753,17 @@ with tab3:
                 rank_html += f'<div class="priority-card"><div><div class="client-name">{row["Cliente"]}</div><div class="days-info">{int(row["Qtd"])} coleta(s) pendente(s)</div></div>{badge}</div>'
             st.markdown(f'<div style="max-height:500px; overflow-y:auto;">{rank_html}</div>',
                         unsafe_allow_html=True)
-
         st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
-
         # ── Tabela detalhada ──────────────────────────────────────────────────
         st.markdown('<div class="section-header">📄 Detalhamento — Coletas Pendentes com Farol</div>',
                     unsafe_allow_html=True)
-
         farol_display_cols = ["Cliente", "Motorista", "Cidade", "Data Prazo",
                               "Data Saída", "Dias Atraso", "Farol", "Ocorrência"]
         farol_available = [c for c in farol_display_cols if c in df_farol.columns]
         df_farol_display = df_farol[farol_available].copy()
-
         # Format dates for display
         for dc in ["Data Prazo", "Data Saída"]:
             if dc in df_farol_display.columns:
                 df_farol_display[dc] = df_farol_display[dc].dt.strftime("%d/%m/%Y").fillna("—")
-
         df_farol_display = df_farol_display.sort_values("Dias Atraso", ascending=False)
-
         st.dataframe(df_farol_display, use_container_width=True, height=420, hide_index=True)
