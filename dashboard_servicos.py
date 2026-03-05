@@ -336,9 +336,9 @@ def read_uploaded_file(uploaded_file):
         df.loc[df["Ocorrência"] == "", "Ocorrência"] = "EM BRANCO"
         df.loc[df["Ocorrência"] == "nan", "Ocorrência"] = "EM BRANCO"
 
-        # Mercadoria redespachada deve ser considerada como ENTREGUE
+        # Mercadoria redespachada ou despacho deve ser considerada como ENTREGUE
         mask_redespacho = df["Ocorrência"].str.upper().str.contains(
-            "MERCADORIA REDESPACHADA", na=False
+            "MERCADORIA REDESPACHADA|DESPACHO", na=False
         )
         df.loc[mask_redespacho, "Status Manifesto"] = "ENTREGUE"
 
